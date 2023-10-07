@@ -1,12 +1,28 @@
 pub fn calculate_expected_gain_loss(position: Position, expected_price: f32) -> f32 {
+    let cost_basis = position.price * position.amount_owned;
+    let mut amount_still_owned = position.amount_owned;
+
     let mut net_options_premiums: f32 = 0.0;
+    let mut net_options_proceedings: f32 = 0.0;
     for b_options in position.options_bought.iter() {
-        net_options_premiums -= b_options.get_premiums();
+        net_options_premiums -= b_options.premiums();
+        if b_options.should_exercise(expected_price) {
+            let txn_result = b_options.exercise();
+            amount_still_owned += txn_result.amount_change;
+            net_options_proceedings += txn_result.cash_change;
+        }
     }
     for s_options in position.options_sold.iter() {
-        net_options_premiums += s_options.get_premiums();
+        net_options_premiums += s_options.premiums();
+        if s_options.should_exercise(expected_price) {
+            let txn_result = s_options.exercise();
+            amount_still_owned -= txn_result.amount_change;
+            net_options_proceedings -= txn_result.cash_change;
+        }
     }
-    net_options_premiums + (expected_price - position.price) * position.amount_owned
+
+    net_options_premiums + net_options_proceedings + amount_still_owned * expected_price
+        - cost_basis
 }
 
 #[derive(Default)]
@@ -35,9 +51,34 @@ pub struct Option {
 }
 
 impl Option {
-    pub fn get_premiums(&self) -> f32 {
+    pub fn premiums(&self) -> f32 {
         self.price * self.amount * 100.0
     }
+
+    pub fn exercise(&self) -> ExerciseResult {
+        match self.contract_type {
+            OptionType::Call => ExerciseResult {
+                amount_change: self.amount * 100.0,
+                cash_change: -self.strike_price * self.amount * 100.0,
+            },
+            OptionType::Put => ExerciseResult {
+                amount_change: -self.amount * 100.0,
+                cash_change: self.strike_price * self.amount * 100.0,
+            },
+        }
+    }
+
+    pub fn should_exercise(&self, expected_price: f32) -> bool {
+        match self.contract_type {
+            OptionType::Call => self.strike_price < expected_price,
+            OptionType::Put => self.strike_price > expected_price,
+        }
+    }
+}
+
+pub struct ExerciseResult {
+    amount_change: f32,
+    cash_change: f32,
 }
 
 pub enum OptionType {
