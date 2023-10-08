@@ -1,36 +1,53 @@
 import { Position, Option, ReturnData } from './types';
 
-// TODO: see if getting break-even point is do-able
+// TODO: get break-even point
 export function getChartPoints(position: Position): ReturnData {
   let expectedPricesOfInterest = [position.price];
+  let highest = position.price,
+    lowest = position.price;
 
   for (let bOptions of position.options_bought) {
     expectedPricesOfInterest.push(bOptions.strike_price);
-    expectedPricesOfInterest.push(getChartPointOfInterest(bOptions, true));
+    let chartInterest = getChartPointOfInterest(bOptions, true);
+    expectedPricesOfInterest.push(chartInterest);
+
+    highest = Math.max(highest, bOptions.strike_price);
+    console.log(highest);
+    lowest = Math.min(lowest, bOptions.strike_price);
+    highest = Math.max(highest, chartInterest);
+    lowest = Math.min(lowest, chartInterest);
   }
   for (let sOptions of position.options_sold) {
     expectedPricesOfInterest.push(sOptions.strike_price);
-    expectedPricesOfInterest.push(getChartPointOfInterest(sOptions, false));
+    let chartInterest = getChartPointOfInterest(sOptions, false);
+    expectedPricesOfInterest.push(chartInterest);
+
+    highest = Math.max(highest, sOptions.strike_price);
+    lowest = Math.min(lowest, sOptions.strike_price);
+    highest = Math.max(highest, chartInterest);
+    lowest = Math.min(lowest, chartInterest);
   }
 
   // TODO: make two additional data points before and after the range added below smarter
-  expectedPricesOfInterest = expectedPricesOfInterest.sort();
-  expectedPricesOfInterest.push(
-    expectedPricesOfInterest[expectedPricesOfInterest.length - 1] +
-      position.price * 0.05
-  );
-  expectedPricesOfInterest = [
-    Math.max(expectedPricesOfInterest[0] - position.price * 0.05, 0.0),
-  ].concat(expectedPricesOfInterest);
+  expectedPricesOfInterest.push(highest + position.price * 0.05);
+  expectedPricesOfInterest.push(Math.max(lowest - position.price * 0.05, 0.0));
+  expectedPricesOfInterest = expectedPricesOfInterest.sort((a, b) => a - b);
 
   let labels: number[] = [];
   let data: number[] = [];
 
   for (let expectedPrice of expectedPricesOfInterest) {
-    labels.push(expectedPrice);
+    labels.push(
+      Number(
+        expectedPrice.toLocaleString('en-US', {
+          maximumFractionDigits: 2,
+          minimumFractionDigits: 2,
+          useGrouping: false,
+        })
+      )
+    );
     data.push(calculateExpectedGainLoss(position, expectedPrice));
   }
-
   return {
     labels,
     data,
