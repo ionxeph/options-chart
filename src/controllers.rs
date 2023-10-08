@@ -2,7 +2,7 @@ use axum::{http::StatusCode, response::IntoResponse, Json};
 
 use crate::{
     calculate::calculate_expected_gain_loss,
-    models::{ChartPoint, Position},
+    models::{Position, ReturnData},
 };
 
 pub async fn get_chart_points(
@@ -27,14 +27,13 @@ pub async fn get_chart_points(
         .push((expected_prices_of_interest[0] - position.price * 0.05).max(0.0));
     expected_prices_of_interest.sort_by(|a, b| a.partial_cmp(b).unwrap());
 
-    let mut chart_points: Vec<ChartPoint> = Vec::with_capacity(expected_prices_of_interest.len());
+    let mut labels: Vec<f32> = Vec::with_capacity(expected_prices_of_interest.len());
+    let mut data: Vec<f32> = Vec::with_capacity(expected_prices_of_interest.len());
 
     for expected_price in expected_prices_of_interest.iter() {
-        chart_points.push(ChartPoint {
-            x: *expected_price,
-            y: calculate_expected_gain_loss(&position, *expected_price),
-        });
+        labels.push(*expected_price);
+        data.push(calculate_expected_gain_loss(&position, *expected_price));
     }
 
-    Ok((StatusCode::OK, Json(chart_points)))
+    Ok((StatusCode::OK, Json(ReturnData { labels, data })))
 }

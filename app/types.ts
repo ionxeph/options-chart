@@ -17,7 +17,7 @@ export type ExerciseResult = {
   cash_change: number;
 };
 
-export type ChartPoint = {
-  x: number;
-  y: number;
+export type ReturnData = {
+  labels: number[];
+  data: number[];
 };

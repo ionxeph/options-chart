@@ -69,7 +69,7 @@ pub enum OptionType {
 }
 
 #[derive(Deserialize, Serialize)]
-pub struct ChartPoint {
-    pub x: f32,
-    pub y: f32,
+pub struct ReturnData {
+    pub labels: Vec<f32>,
+    pub data: Vec<f32>,
 }
