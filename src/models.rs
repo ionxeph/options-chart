@@ -12,13 +12,13 @@ pub struct Position {
 pub struct Option {
     pub contract_type: OptionType,
     pub strike_price: f32,
-    pub price: f32, // assume per unit, each contract has 100 units
+    pub premium: f32, // assume per unit, each contract has 100 units
     pub amount: f32,
 }
 
 impl Option {
     pub fn premiums(&self) -> f32 {
-        self.price * self.amount * 100.0
+        self.premium * self.amount * 100.0
     }
 
     pub fn exercise(&self) -> ExerciseResult {
@@ -40,6 +40,20 @@ impl Option {
             OptionType::Put => self.strike_price > expected_price,
         }
     }
+
+    pub fn get_chart_point_of_interest(&self, bought: bool) -> f32 {
+        if let OptionType::Call = self.contract_type {
+            if bought {
+                self.strike_price + self.premium
+            } else {
+                self.strike_price - self.premium
+            }
+        } else if bought {
+            self.strike_price - self.premium
+        } else {
+            self.strike_price + self.premium
+        }
+    }
 }
 
 #[derive(Deserialize, Serialize)]
@@ -52,4 +66,10 @@ pub struct ExerciseResult {
 pub enum OptionType {
     Call,
     Put,
+}
+
+#[derive(Deserialize, Serialize)]
+pub struct ChartPoint {
+    pub x: f32,
+    pub y: f32,
 }

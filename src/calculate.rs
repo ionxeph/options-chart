@@ -1,6 +1,6 @@
 use crate::models::Position;
 
-pub fn calculate_expected_gain_loss(position: Position, expected_price: f32) -> f32 {
+pub fn calculate_expected_gain_loss(position: &Position, expected_price: f32) -> f32 {
     let cost_basis = position.price * position.amount_owned;
     let mut amount_still_owned = position.amount_owned;
 
@@ -39,7 +39,7 @@ mod tests {
             amount_owned: 500.0,
             ..Position::default()
         };
-        assert_eq!(calculate_expected_gain_loss(position, 16.0), 500.0);
+        assert_eq!(calculate_expected_gain_loss(&position, 16.0), 500.0);
     }
 
     #[test]
@@ -51,16 +51,16 @@ mod tests {
                 strike_price: 14.5,
                 contract_type: OptionType::Put,
                 amount: 1.0,
-                price: 0.25,
+                premium: 0.25,
             }],
             options_sold: vec![Option {
                 strike_price: 16.0,
                 contract_type: OptionType::Call,
                 amount: 1.0,
-                price: 0.15,
+                premium: 0.15,
             }],
         };
-        assert_eq!(calculate_expected_gain_loss(position, 15.5), 40.0);
+        assert_eq!(calculate_expected_gain_loss(&position, 15.5), 40.0);
     }
 
     #[test]
@@ -72,16 +72,16 @@ mod tests {
                 strike_price: 14.5,
                 contract_type: OptionType::Put,
                 amount: 1.0,
-                price: 0.25,
+                premium: 0.25,
             }],
             options_sold: vec![Option {
                 strike_price: 16.0,
                 contract_type: OptionType::Call,
                 amount: 1.0,
-                price: 0.15,
+                premium: 0.15,
             }],
         };
-        assert_eq!(calculate_expected_gain_loss(position, 16.5), 90.0);
+        assert_eq!(calculate_expected_gain_loss(&position, 16.5), 90.0);
     }
 
     #[test]
@@ -93,11 +93,11 @@ mod tests {
                 strike_price: 14.5,
                 contract_type: OptionType::Call,
                 amount: 1.0,
-                price: 0.25,
+                premium: 0.25,
             }],
             ..Position::default()
         };
-        assert_eq!(calculate_expected_gain_loss(position, 15.5), 125.0);
+        assert_eq!(calculate_expected_gain_loss(&position, 15.5), 125.0);
     }
 
     #[test]
@@ -109,11 +109,11 @@ mod tests {
                 strike_price: 14.5,
                 contract_type: OptionType::Put,
                 amount: 1.0,
-                price: 0.25,
+                premium: 0.25,
             }],
             ..Position::default()
         };
-        assert_eq!(calculate_expected_gain_loss(position, 13.0), -325.0);
+        assert_eq!(calculate_expected_gain_loss(&position, 13.0), -325.0);
     }
 
     #[test]
@@ -125,11 +125,11 @@ mod tests {
                 strike_price: 14.5,
                 contract_type: OptionType::Put,
                 amount: 1.0,
-                price: 0.25,
+                premium: 0.25,
             }],
             ..Position::default()
         };
-        assert_eq!(calculate_expected_gain_loss(position, 13.0), -75.0);
+        assert_eq!(calculate_expected_gain_loss(&position, 13.0), -75.0);
     }
 
     #[test]
@@ -142,13 +142,13 @@ mod tests {
                     strike_price: 14.5,
                     contract_type: OptionType::Call,
                     amount: 1.0,
-                    price: 0.75,
+                    premium: 0.75,
                 },
                 Option {
                     strike_price: 13.5,
                     contract_type: OptionType::Put,
                     amount: 1.0,
-                    price: 0.05,
+                    premium: 0.05,
                 },
             ],
             options_sold: vec![
@@ -156,23 +156,23 @@ mod tests {
                     strike_price: 16.5,
                     contract_type: OptionType::Call,
                     amount: 1.0,
-                    price: 0.5,
+                    premium: 0.5,
                 },
                 Option {
                     strike_price: 15.5,
                     contract_type: OptionType::Put,
                     amount: 1.0,
-                    price: 0.85,
+                    premium: 0.85,
                 },
             ],
         };
-        assert_eq!(calculate_expected_gain_loss(position, 13.0), -145.0);
+        assert_eq!(calculate_expected_gain_loss(&position, 13.0), -145.0);
     }
 
     #[test]
     fn test_deserialize() {
-        let json_string = r#"{"price":15,"amount_owned":100,"options_bought":[{"strike_price":14.5,"contract_type":"Put","amount":1,"price":0.25}],"options_sold":[{"strike_price":16,"contract_type":"Call","amount":1,"price":0.15}]}"#;
+        let json_string = r#"{"price":15,"amount_owned":100,"options_bought":[{"strike_price":14.5,"contract_type":"Put","amount":1,"premium":0.25}],"options_sold":[{"strike_price":16,"contract_type":"Call","amount":1,"premium":0.15}]}"#;
         let position: Position = serde_json::from_str(json_string).unwrap();
-        assert_eq!(calculate_expected_gain_loss(position, 15.5), 40.0);
+        assert_eq!(calculate_expected_gain_loss(&position, 14.25), -60.0);
     }
 }
