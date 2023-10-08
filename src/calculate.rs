@@ -168,4 +168,11 @@ mod tests {
         };
         assert_eq!(calculate_expected_gain_loss(position, 13.0), -145.0);
     }
+
+    #[test]
+    fn test_deserialize() {
+        let json_string = r#"{"price":15,"amount_owned":100,"options_bought":[{"strike_price":14.5,"contract_type":"Put","amount":1,"price":0.25}],"options_sold":[{"strike_price":16,"contract_type":"Call","amount":1,"price":0.15}]}"#;
+        let position: Position = serde_json::from_str(json_string).unwrap();
+        assert_eq!(calculate_expected_gain_loss(position, 15.5), 40.0);
+    }
 }

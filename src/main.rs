@@ -1,4 +1,4 @@
-use axum::{routing::get, Router};
+use axum::{routing::post, Router};
 use tower_http::cors::CorsLayer;
 
 mod calculate;
@@ -8,7 +8,7 @@ mod models;
 #[tokio::main]
 async fn main() {
     let app = Router::new()
-        .route("/", get(controllers::get_chart_points))
+        .route("/", post(controllers::get_chart_points))
         .layer(CorsLayer::permissive());
 
     let addr = std::net::SocketAddr::from(([127, 0, 0, 1], 3001));

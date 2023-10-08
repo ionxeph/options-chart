@@ -18,5 +18,8 @@
   "dependencies": {
     "chart.js": "^4.4.0",
     "solid-js": "^1.7.6"
+  },
+  "prettier": {
+    "singleQuote": true
   }
 }
