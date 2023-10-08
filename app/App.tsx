@@ -43,28 +43,99 @@ const App: Component = () => {
       let lowestY = data[0];
       let highestY = data[data.length - 1];
 
+      const pointColorFn = function (context) {
+        if (context.parsed.y < 0) {
+          return 'rgb(255, 0, 0)';
+        }
+
+        return 'rgb(0, 255, 0)';
+      };
+
       const ctx = canvas.getContext('2d') as ChartItem;
-      // TODO: figure out scriptable options
       const chart = new Chart(ctx, {
-        type: 'line',
         data: {
           labels: labels,
           datasets: [
             {
+              type: 'scatter',
               label: 'net gain-loss',
               data: data,
-              fill: false,
-              borderColor: 'rgb(75, 192, 192)',
               tension: 0,
               yAxisID: 'yAxis',
+              xAxisID: 'xAxis',
+              fill: true,
+              pointRadius: 10,
+              pointHoverRadius: 15,
+              pointBorderColor: pointColorFn,
+              pointBackgroundColor: pointColorFn,
+
+              segment: {
+                backgroundColor: function (ctx) {
+                  if (ctx.p1.parsed.y > 0) {
+                    return 'rgba(0, 255, 0, 0.25)';
+                  }
+                  return 'rgba(255, 0, 0, 0.25)';
+                },
+                borderColor: function (ctx) {
+                  if (ctx.p1.parsed.y > 0) {
+                    return 'rgba(0, 255, 0, 0.25)';
+                  }
+                  return 'rgba(255, 0, 0, 0.25)';
+                },
+              },
+            },
+            {
+              type: 'line',
+              label: 'net gain-loss',
+              data: data,
+              tension: 0,
+              yAxisID: 'yAxis',
+              xAxisID: 'xAxis',
+              pointRadius: 10,
+              pointHoverRadius: 15,
+              pointBorderColor: pointColorFn,
+              pointBackgroundColor: pointColorFn,
+              borderColor: 'rgb(75, 192, 192)',
+              // fill: true,
+              // segment: {
+              //   backgroundColor: function (ctx) {
+              //     if (ctx.p1.parsed.y > 0) {
+              //       return 'rgba(0, 255, 0, 0.25)';
+              //     }
+              //     return 'rgba(255, 0, 0, 0.25)';
+              //   },
+              //   borderColor: function (ctx) {
+              //     if (ctx.p1.parsed.y > 0) {
+              //       return 'rgba(0, 255, 0, 0.25)';
+              //     }
+              //     return 'rgba(255, 0, 0, 0.25)';
+              //   },
+              // },
             },
           ],
         },
         options: {
+          plugins: {
+            legend: {
+              display: false,
+            },
+            title: {
+              display: false,
+            },
+          },
           scales: {
             yAxis: {
               suggestedMax: highestY + mockData.price,
               suggestedMin: lowestY - mockData.price,
+              grid: {
+                lineWidth: function (context) {
+                  if (context.tick.value === 0) {
+                    return 6;
+                  } else {
+                    return 1;
+                  }
+                },
+              },
             },
           },
         },

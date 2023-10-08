@@ -1,5 +1,6 @@
 import { Position, Option, ReturnData } from './types';
 
+// TODO: see if getting break-even point is do-able
 export function getChartPoints(position: Position): ReturnData {
   let expectedPricesOfInterest = [position.price];
 
