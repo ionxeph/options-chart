@@ -62,6 +62,7 @@ const App: Component = () => {
       });
 
       const ctx = canvas.getContext('2d') as ChartItem;
+      // TODO: figure out scriptable options
       const chart = new Chart(ctx, {
         type: 'line',
         data: {
