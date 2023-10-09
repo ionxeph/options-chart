@@ -48,6 +48,7 @@ export function getChartPoints(position: Position): ReturnData {
     );
     data.push(calculateExpectedGainLoss(position, expectedPrice));
   }
+
   return {
     labels,
     data,
