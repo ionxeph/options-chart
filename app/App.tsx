@@ -21,7 +21,22 @@ import {
   ToggleButton,
   ToggleButtonGroup,
   Typography,
+  ThemeProvider,
+  createTheme,
+  CssBaseline,
 } from '@suid/material';
+
+const theme = createTheme({
+  palette: {
+    mode: 'dark',
+    // primary: {
+    //   main: '#1976d2',
+    // },
+    // secondary: {
+    //   main: '#9c27b0',
+    // },
+  },
+});
 
 const pointColorFn = function (context) {
   if (context.parsed.y === 0) {
@@ -77,6 +92,8 @@ const App: Component = () => {
             showLine: true,
             pointRadius: 10,
             pointHoverRadius: 15,
+            borderWidth: 4,
+            pointBorderWidth: 1,
             // pointBorderColor: pointColorFn,
             // pointBackgroundColor: pointColorFn,
             // borderColor: 'rgb(75, 192, 192)',
@@ -110,6 +127,7 @@ const App: Component = () => {
         scales: {
           yAxis: {
             grid: {
+              color: 'rgba(211, 211, 211, 0.25)',
               lineWidth: function (context) {
                 if (context.tick.value === 0) {
                   return 6;
@@ -117,6 +135,11 @@ const App: Component = () => {
                   return 1;
                 }
               },
+            },
+          },
+          xAxis: {
+            grid: {
+              color: 'rgba(211, 211, 211, 0.25)',
             },
           },
         },
@@ -150,7 +173,8 @@ const App: Component = () => {
   //   ],
   // };
   return (
-    <>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
       <Box
         sx={{
           '& > :not(style)': { m: 1, width: '40%' },
@@ -405,7 +429,7 @@ const App: Component = () => {
       </Stack>
 
       <canvas ref={(el) => setCanvasRef(el)}></canvas>
-    </>
+    </ThemeProvider>
   );
 };
 
