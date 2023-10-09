@@ -7,19 +7,18 @@ export function getChartPoints(position: Position): ReturnData {
     lowest = position.price;
 
   for (let bOptions of position.options_bought) {
-    expectedPricesOfInterest.push(bOptions.strike_price);
     let chartInterest = getChartPointOfInterest(bOptions, true);
+    expectedPricesOfInterest.push(bOptions.strike_price);
     expectedPricesOfInterest.push(chartInterest);
 
     highest = Math.max(highest, bOptions.strike_price);
-    console.log(highest);
     lowest = Math.min(lowest, bOptions.strike_price);
     highest = Math.max(highest, chartInterest);
     lowest = Math.min(lowest, chartInterest);
   }
   for (let sOptions of position.options_sold) {
-    expectedPricesOfInterest.push(sOptions.strike_price);
     let chartInterest = getChartPointOfInterest(sOptions, false);
+    expectedPricesOfInterest.push(sOptions.strike_price);
     expectedPricesOfInterest.push(chartInterest);
 
     highest = Math.max(highest, sOptions.strike_price);
@@ -31,6 +30,7 @@ export function getChartPoints(position: Position): ReturnData {
   // TODO: make two additional data points before and after the range added below smarter
   expectedPricesOfInterest.push(highest + position.price * 0.05);
   expectedPricesOfInterest.push(Math.max(lowest - position.price * 0.05, 0.0));
+  expectedPricesOfInterest = [...new Set(expectedPricesOfInterest)];
   expectedPricesOfInterest = expectedPricesOfInterest.sort((a, b) => a - b);
 
   let labels: number[] = [];

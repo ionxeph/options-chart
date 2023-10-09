@@ -6,7 +6,9 @@ import {
   untrack,
   createEffect,
   For,
+  Show,
 } from 'solid-js';
+import { createStore } from 'solid-js/store';
 import Chart, { ChartItem } from 'chart.js/auto';
 import { Option, Position } from './types';
 import { getChartPoints } from './calculate';
@@ -35,30 +37,17 @@ const pointColorFn = function (context) {
 const App: Component = () => {
   const [canvasRef, setCanvasRef] = createSignal<HTMLCanvasElement | null>();
   const [chart, setChart] = createSignal<Chart>();
-  const [position, setPosition] = createSignal<Position>({
+  const [position, setPosition] = createStore<Position>({
     price: 10.0,
     amount_owned: 100.0,
     options_bought: [],
     options_sold: [],
   });
-  const [sOptions, setSOptions] = createSignal<Option[]>([]);
-  const [bOptions, setBOptions] = createSignal<Option[]>([]);
-
-  // when options change
-  createEffect(() => {
-    const optionsSold = sOptions();
-    const optionsBought = bOptions();
-    untrack(() => {
-      const newPosition: Position = JSON.parse(JSON.stringify(position()));
-      newPosition.options_sold = optionsSold;
-      newPosition.options_bought = optionsBought;
-      setPosition(newPosition);
-    });
-  });
 
   // when position changes
   createEffect(() => {
-    let chartPoints = getChartPoints(position());
+    console.log('store change', position);
+    let chartPoints = getChartPoints(position);
     let labels = chartPoints.labels;
     let data = chartPoints.data;
     untrack(() => {
@@ -72,7 +61,7 @@ const App: Component = () => {
 
   onMount(() => {
     const ctx = canvasRef().getContext('2d') as ChartItem;
-    let chartPoints = getChartPoints(position());
+    let chartPoints = getChartPoints(position);
     let labels = chartPoints.labels;
     let data = chartPoints.data;
     const chart = new Chart(ctx, {
@@ -175,7 +164,7 @@ const App: Component = () => {
           defaultValue={10}
           onInput={(e: InputEvent) =>
             setPosition({
-              ...position(),
+              ...position,
               price: Number((e.target as HTMLInputElement).value),
             })
           }
@@ -187,91 +176,160 @@ const App: Component = () => {
           defaultValue={100}
           onInput={(e: InputEvent) =>
             setPosition({
-              ...position(),
+              ...position,
               amount_owned: Number((e.target as HTMLInputElement).value),
             })
           }
         />
       </Box>
 
-      <Box
-        sx={{
-          '& > :not(style)': { m: 1, width: '20%' },
-          textAlign: 'center',
-        }}
-      >
-        <For each={sOptions()}>
-          {(sOption, i) => (
-            <>
-              <ToggleButtonGroup
-                id={`sold-option-type-${i()}`}
-                color="primary"
-                // value={position().options_sold[i()].contract_type} // TODO: how to bind this value
-                exclusive
-                onChange={(_, newType) => {
-                  const newPosition: Position = JSON.parse(
-                    JSON.stringify(position())
-                  );
-                  newPosition.options_sold[i()].contract_type = newType;
+      <Show when={position.options_sold.length > 0}>
+        <Box
+          sx={{
+            '& > :not(style)': { m: 1, width: '20%' },
+            textAlign: 'center',
+          }}
+        >
+          <Typography variant="body1">Options sold</Typography>
+          <For each={position.options_sold}>
+            {(sOption, i) => (
+              <>
+                <ToggleButtonGroup
+                  id={`sold-option-type-${i()}`}
+                  color="primary"
+                  value={sOption.contract_type}
+                  exclusive
+                  onChange={(_, newType) => {
+                    setPosition('options_sold', i(), 'contract_type', newType);
+                  }}
+                >
+                  <ToggleButton value="Call">Call</ToggleButton>
+                  <ToggleButton value="Put">Put</ToggleButton>
+                </ToggleButtonGroup>
+                <TextField
+                  id={`sold-option-strike-${i()}`}
+                  label="Strike price"
+                  type="number"
+                  defaultValue={position.price}
+                  onInput={(e: InputEvent) => {
+                    setPosition(
+                      'options_sold',
+                      i(),
+                      'strike_price',
+                      Number((e.target as HTMLInputElement).value)
+                    );
+                  }}
+                />
+                <TextField
+                  id={`sold-option-amount-${i()}`}
+                  label="Number of contracts"
+                  type="number"
+                  defaultValue={1}
+                  onInput={(e: InputEvent) => {
+                    setPosition(
+                      'options_sold',
+                      i(),
+                      'amount',
+                      Number((e.target as HTMLInputElement).value)
+                    );
+                  }}
+                />
+                <TextField
+                  id={`sold-option-premium-${i()}`}
+                  label="Premium (per share)"
+                  type="number"
+                  defaultValue={0.2}
+                  onInput={(e: InputEvent) => {
+                    setPosition(
+                      'options_sold',
+                      i(),
+                      'premium',
+                      Number((e.target as HTMLInputElement).value)
+                    );
+                  }}
+                />
+              </>
+            )}
+          </For>
+        </Box>
+      </Show>
 
-                  setPosition(newPosition);
-                }}
-              >
-                <ToggleButton value="Call">Call</ToggleButton>
-                <ToggleButton value="Put">Put</ToggleButton>
-              </ToggleButtonGroup>
-              <TextField
-                id={`sold-option-strike-${i()}`}
-                label="Strike price"
-                type="number"
-                defaultValue={sOption.strike_price}
-                onInput={(e: InputEvent) => {
-                  const newPosition: Position = JSON.parse(
-                    JSON.stringify(position())
-                  );
-                  newPosition.options_sold[i()].strike_price = Number(
-                    (e.target as HTMLInputElement).value
-                  );
+      <Show when={position.options_bought.length > 0}>
+        <Box
+          sx={{
+            '& > :not(style)': { m: 1, width: '20%' },
+            textAlign: 'center',
+          }}
+        >
+          <Typography variant="body1">Options bought</Typography>
+          <For each={position.options_bought}>
+            {(bOption, i) => (
+              <>
+                <ToggleButtonGroup
+                  id={`bought-option-type-${i()}`}
+                  color="primary"
+                  value={bOption.contract_type}
+                  exclusive
+                  onChange={(_, newType) => {
+                    setPosition(
+                      'options_bought',
+                      i(),
+                      'contract_type',
+                      newType
+                    );
+                  }}
+                >
+                  <ToggleButton value="Call">Call</ToggleButton>
+                  <ToggleButton value="Put">Put</ToggleButton>
+                </ToggleButtonGroup>
+                <TextField
+                  id={`bought-option-strike-${i()}`}
+                  label="Strike price"
+                  type="number"
+                  defaultValue={position.price}
+                  onInput={(e: InputEvent) => {
+                    setPosition(
+                      'options_bought',
+                      i(),
+                      'strike_price',
+                      Number((e.target as HTMLInputElement).value)
+                    );
+                  }}
+                />
+                <TextField
+                  id={`bought-option-amount-${i()}`}
+                  label="Number of contracts"
+                  type="number"
+                  defaultValue={1}
+                  onInput={(e: InputEvent) => {
+                    setPosition(
+                      'options_bought',
+                      i(),
+                      'amount',
+                      Number((e.target as HTMLInputElement).value)
+                    );
+                  }}
+                />
+                <TextField
+                  id={`bought-option-premium-${i()}`}
+                  label="Premium (per share)"
+                  type="number"
+                  defaultValue={0.2}
+                  onInput={(e: InputEvent) => {
+                    setPosition(
+                      'options_bought',
+                      i(),
+                      'premium',
+                      Number((e.target as HTMLInputElement).value)
+                    );
+                  }}
+                />
+              </>
+            )}
+          </For>
+        </Box>
+      </Show>
 
-                  setPosition(newPosition);
-                }}
-              />
-              <TextField
-                id={`sold-option-amount-${i()}`}
-                label="Number of contracts"
-                type="number"
-                defaultValue={sOption.amount}
-                onInput={(e: InputEvent) => {
-                  const newPosition: Position = JSON.parse(
-                    JSON.stringify(position())
-                  );
-                  newPosition.options_sold[i()].amount = Number(
-                    (e.target as HTMLInputElement).value
-                  );
-
-                  setPosition(newPosition);
-                }}
-              />
-              <TextField
-                id={`sold-option-premium-${i()}`}
-                label="Premium (per share)"
-                type="number"
-                defaultValue={sOption.premium}
-                onInput={(e: InputEvent) => {
-                  const newPosition: Position = JSON.parse(
-                    JSON.stringify(position())
-                  );
-                  newPosition.options_sold[i()].premium = Number(
-                    (e.target as HTMLInputElement).value
-                  );
-
-                  setPosition(newPosition);
-                }}
-              />
-            </>
-          )}
-        </For>
-      </Box>
       <Stack
         spacing={2}
         direction="row"
@@ -283,22 +341,67 @@ const App: Component = () => {
         <Button
           variant="outlined"
           onClick={() => {
-            setSOptions([
-              ...position().options_sold,
+            setPosition('options_sold', (l) => [
+              ...l,
               {
                 premium: 0.2,
                 contract_type: 'Call',
                 amount: 1,
-                strike_price: position().price + 1,
+                strike_price: position.price,
               },
             ]);
           }}
         >
           SELL CALL
         </Button>
-        <Button variant="outlined">SELL PUT</Button>
-        <Button variant="outlined">BUY CALL</Button>
-        <Button variant="outlined">BUY PUT</Button>
+        <Button
+          variant="outlined"
+          onClick={() => {
+            setPosition('options_sold', (l) => [
+              ...l,
+              {
+                premium: 0.2,
+                contract_type: 'Put',
+                amount: 1,
+                strike_price: position.price,
+              },
+            ]);
+          }}
+        >
+          SELL PUT
+        </Button>
+        <Button
+          variant="outlined"
+          onClick={() => {
+            setPosition('options_bought', (l) => [
+              ...l,
+              {
+                premium: 0.2,
+                contract_type: 'Call',
+                amount: 1,
+                strike_price: position.price,
+              },
+            ]);
+          }}
+        >
+          BUY CALL
+        </Button>
+        <Button
+          variant="outlined"
+          onClick={() => {
+            setPosition('options_bought', (l) => [
+              ...l,
+              {
+                premium: 0.2,
+                contract_type: 'Put',
+                amount: 1,
+                strike_price: position.price,
+              },
+            ]);
+          }}
+        >
+          BUY PUT
+        </Button>
       </Stack>
 
       <canvas ref={(el) => setCanvasRef(el)}></canvas>
