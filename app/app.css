@@ -1,0 +1,50 @@
+.grid {
+  margin: 2rem 1rem;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+.stock {
+  display: grid;
+  grid-template-rows: 1fr 1fr;
+  gap: 1rem;
+}
+
+.options {
+  display: grid;
+  gap: 1rem;
+  border: 1px dashed rgba(255, 255, 255, 0.23);
+  padding: 0.25rem;
+  border-radius: 4px;
+}
+
+.options-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 0.5rem;
+}
+
+@media (min-width: 480px) {
+  .stock {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: unset;
+  }
+
+  .options-buttons {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .options {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+
+  .options p {
+    grid-column: span 3;
+  }
+
+  .options .MuiToggleButtonGroup-root {
+    grid-column: span 3;
+  }
+}

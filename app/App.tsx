@@ -26,6 +26,7 @@ import {
   CssBaseline,
 } from '@suid/material';
 import { getBaseChart } from './chart-props';
+import './app.css';
 
 const theme = createTheme({
   palette: {
@@ -62,7 +63,7 @@ const App: Component = () => {
     let chartPoints = getChartPoints(position);
     let labels = chartPoints.labels;
     let data = chartPoints.data;
-    const chart = getBaseChart(ctx, data, labels);
+    const chart = new Chart(ctx, getBaseChart(data, labels) as any);
     setChart(chart);
   });
 
@@ -73,13 +74,8 @@ const App: Component = () => {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <div style="max-width: 1024px; margin: 20px; flex: 1">
-        <Box
-          sx={{
-            '& > :not(style)': { m: 1, width: '40%' },
-            textAlign: 'center',
-          }}
-        >
+      <div class="grid">
+        <div class="stock">
           <TextField
             id="equity-price"
             label="Bought price"
@@ -104,14 +100,10 @@ const App: Component = () => {
               })
             }
           />
-        </Box>
+        </div>
 
         <Show when={position.options_sold.length > 0}>
-          <Box
-            sx={{
-              '& > :not(style)': { m: 1, width: '20%' },
-            }}
-          >
+          <div class="options">
             <Typography variant="body1">Options sold</Typography>
             <For each={position.options_sold}>
               {(sOption, i) => (
@@ -178,15 +170,11 @@ const App: Component = () => {
                 </>
               )}
             </For>
-          </Box>
+          </div>
         </Show>
 
         <Show when={position.options_bought.length > 0}>
-          <Box
-            sx={{
-              '& > :not(style)': { m: 1, width: '20%' },
-            }}
-          >
+          <div class="options">
             <Typography variant="body1">Options bought</Typography>
             <For each={position.options_bought}>
               {(bOption, i) => (
@@ -253,17 +241,10 @@ const App: Component = () => {
                 </>
               )}
             </For>
-          </Box>
+          </div>
         </Show>
 
-        <Stack
-          spacing={2}
-          direction="row"
-          sx={{
-            '& > :not(style)': { width: '25%' },
-            m: 2,
-          }}
-        >
+        <div class="options-buttons">
           <Button
             variant="outlined"
             onClick={() => {
@@ -328,9 +309,9 @@ const App: Component = () => {
           >
             BUY PUT
           </Button>
-        </Stack>
-        <canvas ref={(el) => setCanvasRef(el)}></canvas>
+        </div>
       </div>
+      <canvas ref={(el) => setCanvasRef(el)}></canvas>
     </ThemeProvider>
   );
 };
