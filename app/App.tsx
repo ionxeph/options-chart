@@ -25,29 +25,13 @@ import {
   createTheme,
   CssBaseline,
 } from '@suid/material';
+import { getBaseChart } from './chart-props';
 
 const theme = createTheme({
   palette: {
     mode: 'dark',
-    // primary: {
-    //   main: '#1976d2',
-    // },
-    // secondary: {
-    //   main: '#9c27b0',
-    // },
   },
 });
-
-const pointColorFn = function (context) {
-  if (context.parsed.y === 0) {
-    return 'rgb(0, 0, 0)';
-  }
-  if (context.parsed.y < 0) {
-    return 'rgb(255, 0, 0)';
-  }
-
-  return 'rgb(0, 255, 0)';
-};
 
 const App: Component = () => {
   const [canvasRef, setCanvasRef] = createSignal<HTMLCanvasElement | null>();
@@ -78,67 +62,7 @@ const App: Component = () => {
     let chartPoints = getChartPoints(position);
     let labels = chartPoints.labels;
     let data = chartPoints.data;
-    const chart = new Chart(ctx, {
-      data: {
-        labels: labels,
-        datasets: [
-          {
-            type: 'scatter',
-            label: 'net gain-loss',
-            data: data,
-            tension: 0,
-            yAxisID: 'yAxis',
-            showLine: true,
-            pointRadius: 10,
-            pointHoverRadius: 15,
-            borderWidth: 4,
-            pointBorderWidth: 1,
-            // pointBorderColor: pointColorFn,
-            // pointBackgroundColor: pointColorFn,
-            // borderColor: 'rgb(75, 192, 192)',
-            // fill: true,
-            // segment: {
-            //   backgroundColor: function (ctx) {
-            //     if (ctx.p1.parsed.y > 0) {
-            //       return 'rgba(0, 255, 0, 0.25)';
-            //     }
-            //     return 'rgba(255, 0, 0, 0.25)';
-            //   },
-            //   borderColor: function (ctx) {
-            //     if (ctx.p1.parsed.y > 0) {
-            //       return 'rgba(0, 255, 0, 0.25)';
-            //     }
-            //     return 'rgba(255, 0, 0, 0.25)';
-            //   },
-            // },
-          },
-        ],
-      },
-      options: {
-        plugins: {
-          legend: {
-            display: false,
-          },
-          title: {
-            display: false,
-          },
-        },
-        scales: {
-          yAxis: {
-            grid: {
-              color: 'rgba(211, 211, 211, 0.25)',
-              lineWidth: function (context) {
-                if (context.tick.value === 0) {
-                  return 6;
-                } else {
-                  return 1;
-                }
-              },
-            },
-          },
-        },
-      },
-    });
+    const chart = getBaseChart(ctx, data, labels);
     setChart(chart);
   });
 
@@ -146,26 +70,6 @@ const App: Component = () => {
     chart()?.destroy();
   });
 
-  // const mockData: Position = {
-  //   price: 15.0,
-  //   amount_owned: 100.0,
-  //   options_bought: [
-  //     {
-  //       strike_price: 14.5,
-  //       contract_type: 'Put',
-  //       amount: 1.0,
-  //       premium: 0.25,
-  //     },
-  //   ],
-  //   options_sold: [
-  //     {
-  //       strike_price: 16.0,
-  //       contract_type: 'Call',
-  //       amount: 1.0,
-  //       premium: 0.15,
-  //     },
-  //   ],
-  // };
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
