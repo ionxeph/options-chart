@@ -24,8 +24,10 @@ import {
   ThemeProvider,
   createTheme,
   CssBaseline,
+  IconButton,
 } from '@suid/material';
 import { getBaseChart } from './chart-props';
+import DeleteIcon from '@suid/icons-material/Delete';
 import './app.css';
 
 const theme = createTheme({
@@ -193,6 +195,19 @@ const App: Component = () => {
                     <ToggleButton value="Call">Call</ToggleButton>
                     <ToggleButton value="Put">Put</ToggleButton>
                   </ToggleButtonGroup>
+                  <div class="delete">
+                    <IconButton
+                      aria-label="delete"
+                      onClick={() => {
+                        setPosition('options_sold', (l) => {
+                          l.splice(i(), 1);
+                          return [...l];
+                        });
+                      }}
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  </div>
                   <TextField
                     id={`sold-option-strike-${i()}`}
                     label="Strike price"
@@ -264,6 +279,19 @@ const App: Component = () => {
                     <ToggleButton value="Call">Call</ToggleButton>
                     <ToggleButton value="Put">Put</ToggleButton>
                   </ToggleButtonGroup>
+                  <div class="delete">
+                    <IconButton
+                      aria-label="delete"
+                      onClick={() => {
+                        setPosition('options_bought', (l) => {
+                          l.splice(i(), 1);
+                          return [...l];
+                        });
+                      }}
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  </div>
                   <TextField
                     id={`bought-option-strike-${i()}`}
                     label="Strike price"

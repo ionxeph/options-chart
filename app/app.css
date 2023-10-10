@@ -17,6 +17,24 @@
   border: 1px dashed rgba(255, 255, 255, 0.23);
   padding: 0.25rem;
   border-radius: 4px;
+  grid-template-columns: 1fr 1fr;
+}
+
+.options > p {
+  grid-column: span 2;
+}
+
+.options .MuiToggleButtonGroup-root {
+  grid-column: span 1;
+}
+
+.delete {
+  grid-column: span 1;
+  text-align: right;
+}
+
+.options .MuiTextField-root {
+  grid-column: span 2;
 }
 
 .options-buttons {
@@ -40,11 +58,19 @@
     grid-template-columns: 1fr 1fr 1fr;
   }
 
-  .options p {
+  .options > p {
     grid-column: span 3;
   }
 
   .options .MuiToggleButtonGroup-root {
-    grid-column: span 3;
+    grid-column: span 2;
+  }
+
+  .delete {
+    grid-column: span 1;
+  }
+
+  .options .MuiTextField-root {
+    grid-column: span 1;
   }
 }
