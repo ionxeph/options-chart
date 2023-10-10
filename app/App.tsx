@@ -74,6 +74,7 @@ const App: Component = () => {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
+      <canvas ref={(el) => setCanvasRef(el)}></canvas>
       <div class="grid">
         <div class="stock">
           <TextField
@@ -100,6 +101,73 @@ const App: Component = () => {
               })
             }
           />
+        </div>
+
+        <div class="options-buttons">
+          <Button
+            variant="outlined"
+            onClick={() => {
+              setPosition('options_sold', (l) => [
+                ...l,
+                {
+                  premium: 0.2,
+                  contract_type: 'Call',
+                  amount: 1,
+                  strike_price: position.price,
+                },
+              ]);
+            }}
+          >
+            SELL CALL
+          </Button>
+          <Button
+            variant="outlined"
+            onClick={() => {
+              setPosition('options_sold', (l) => [
+                ...l,
+                {
+                  premium: 0.2,
+                  contract_type: 'Put',
+                  amount: 1,
+                  strike_price: position.price,
+                },
+              ]);
+            }}
+          >
+            SELL PUT
+          </Button>
+          <Button
+            variant="outlined"
+            onClick={() => {
+              setPosition('options_bought', (l) => [
+                ...l,
+                {
+                  premium: 0.2,
+                  contract_type: 'Call',
+                  amount: 1,
+                  strike_price: position.price,
+                },
+              ]);
+            }}
+          >
+            BUY CALL
+          </Button>
+          <Button
+            variant="outlined"
+            onClick={() => {
+              setPosition('options_bought', (l) => [
+                ...l,
+                {
+                  premium: 0.2,
+                  contract_type: 'Put',
+                  amount: 1,
+                  strike_price: position.price,
+                },
+              ]);
+            }}
+          >
+            BUY PUT
+          </Button>
         </div>
 
         <Show when={position.options_sold.length > 0}>
@@ -243,75 +311,7 @@ const App: Component = () => {
             </For>
           </div>
         </Show>
-
-        <div class="options-buttons">
-          <Button
-            variant="outlined"
-            onClick={() => {
-              setPosition('options_sold', (l) => [
-                ...l,
-                {
-                  premium: 0.2,
-                  contract_type: 'Call',
-                  amount: 1,
-                  strike_price: position.price,
-                },
-              ]);
-            }}
-          >
-            SELL CALL
-          </Button>
-          <Button
-            variant="outlined"
-            onClick={() => {
-              setPosition('options_sold', (l) => [
-                ...l,
-                {
-                  premium: 0.2,
-                  contract_type: 'Put',
-                  amount: 1,
-                  strike_price: position.price,
-                },
-              ]);
-            }}
-          >
-            SELL PUT
-          </Button>
-          <Button
-            variant="outlined"
-            onClick={() => {
-              setPosition('options_bought', (l) => [
-                ...l,
-                {
-                  premium: 0.2,
-                  contract_type: 'Call',
-                  amount: 1,
-                  strike_price: position.price,
-                },
-              ]);
-            }}
-          >
-            BUY CALL
-          </Button>
-          <Button
-            variant="outlined"
-            onClick={() => {
-              setPosition('options_bought', (l) => [
-                ...l,
-                {
-                  premium: 0.2,
-                  contract_type: 'Put',
-                  amount: 1,
-                  strike_price: position.price,
-                },
-              ]);
-            }}
-          >
-            BUY PUT
-          </Button>
-        </div>
       </div>
-      <canvas ref={(el) => setCanvasRef(el)}></canvas>
     </ThemeProvider>
   );
 };
